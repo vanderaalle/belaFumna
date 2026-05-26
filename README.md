@@ -29,11 +29,10 @@ Design priorities are stability, instant recall, and a small number of well-chos
 - Diecast aluminium, 187 × 118 × 38 mm, 0.66 kg
 
 ### Controls
-- **SW1–SW6** — 6 illuminated latching 3PDT footswitches (SW6 spare in some configurations)
+- **SW1–SW6** — 6 illuminated latching 3PDT footswitches
 - **K1** — Input gain
 - **K2** — Dry/wet blend
 - **K3** — Output volume
-- LED current limiting: 100Ω resistors
 
 ### Audio I/O
 - Input: Lumberg KLB3 6.35mm mono jack
@@ -48,6 +47,16 @@ Design priorities are stability, instant recall, and a small number of well-chos
 - Bela board: [eu.shop.bela.io](https://eu.shop.bela.io)
 - Enclosure, footswitches, knobs, pots, jacks, resistors: [Musikding.de](https://www.musikding.de)
 
+### Wiring
+
+Electronic wiring of the full pedal:
+
+![Wiring diagram](wiring.svg)
+
+Per-switch soldering guide (all 6 switches identical):
+
+![Switch wiring](switch_wiring.svg)
+
 ---
 
 ## Software architectures
@@ -55,6 +64,8 @@ Design priorities are stability, instant recall, and a small number of well-chos
 Bela Fumna illustrates the reprogrammability of the expanded pedal through two alternative SC implementations, with different effect sets and different internal architectures. Both share the same hardware; only the code on the Bela changes.
 
 All processing runs in SuperCollider on Bela. There is no hardware true bypass — dry/wet and bypass are handled in software via `XFade2`. Switching is arithmetic: each effect output is multiplied by its footswitch state, and the wet mix is normalised by the count of active effects to prevent level jumps on toggle.
+
+![Signal flow](arch.svg)
 
 ---
 
@@ -191,16 +202,14 @@ s.options.memSize              = 65536;
 ```
 belaFumna/
 ├── nickelodeon20260507/
-│   ├── _main.scd               # Monolithic architecture — deployed Bela code
-│   └── <sample files>          # Audio files used by sampler effects
+│   └── _main.scd               # Monolithic architecture — deployed Bela code
 ├── bela_fumna_bela.scd         # Distributed architecture — Bela hardware version
 ├── bela_fumna_laptop.scd       # Distributed architecture — laptop/GUI version
 ├── bela_fumna_template.scd     # Monolithic template — correct pins, empty DSP slots
 ├── belaInputTester.scd         # Hardware diagnostic: polls AnalogIn/DigitalIn pins
-├── arch.dot / arch.svg                 # Signal-flow diagram
-├── wiring.dot / wiring.svg             # Electronic wiring diagram (full pedal)
-├── switch_wiring.dot / switch_wiring.svg  # 3PDT switch soldering guide (per-switch)
-├── samples/                    # Sample files for laptop testing (distributed arch)
+├── arch.dot / arch.svg         # Signal-flow diagram
+├── wiring.dot / wiring.svg     # Electronic wiring diagram (full pedal)
+├── switch_wiring.dot / switch_wiring.svg  # 3PDT switch soldering guide
 └── _archive/                   # Superseded code (gitignored — local reference only)
 ```
 
@@ -211,8 +220,7 @@ belaFumna/
 1. Connect Bela via USB and open `http://bela.local`.
 2. Create a SuperCollider project named e.g. `belafumna`.
 3. Upload `nickelodeon20260507/_main.scd` as the project's main file.
-4. Upload sample files to `/root/belafumna/` on the Bela filesystem.
-5. Click **Run**.
+4. Click **Run**.
 
 To set the project to run automatically on boot:
 
@@ -233,14 +241,23 @@ Use `bela_fumna_laptop.scd` in the standard SC IDE. The file replaces all `Analo
 
 ## Design notes
 
-- **Amplitude scaling** is done in dB space, not linear, for more musical envelope-controlled response.
-- **`Normalizer.ar`** was tested and rejected for the autowah makeup gain — it acts as a sustainer rather than a level corrector.
+### Hardware
+
+- **Output LPF** (330Ω + 22nF): placed on the Bela audio output to attenuate sigma-delta converter out-of-band noise before nonlinear downstream stages (preamp/DI).
+- **Bela mono wiring:** Bela's codec requires both stereo channels connected. Both L and R outputs are wired to the mono output jack. Leaving either floating results in no signal or noise.
+- **Switches:** 3PDT latching, active-low. Pole 1 drives the LED (hardware only). Pole 2 feeds a Bela DigitalIn via a 10kΩ pull-down. See `switch_wiring.svg` for the full soldering guide.
+
+### Effects
+
+- **Oct down (monolithic):** uses `ToggleFF` zero-crossing divider rather than ring modulation. The ring-mod approach (used in the distributed version) produces intermodulation artefacts on complex bass signals at low frequencies.
+- **Oct up:** `PitchShift.ar` rather than `sig*sig` — frequency doubling via squaring has no audible effect on complex signals.
+- **Autowah:** amplitude scaling is done in dB space for a more musical envelope-controlled response. `Normalizer.ar` was tested and rejected as makeup gain — it acts as a sustainer rather than a level corrector.
+
+### SuperCollider / Bela
+
+- **Monolithic SynthDef:** all six effects run unconditionally on every block. Computing a bypassed signal and multiplying by zero is cheaper on a single-core system than dynamic graph restructuring.
 - **`s.sync`** requires a `Routine` context; all server-synchronous code is wrapped accordingly.
 - **GUI calls** from non-AppClock threads use `.defer`.
-- **Oct down (monolithic):** uses `ToggleFF` zero-crossing divider rather than ring modulation. The ring-mod approach (used in the distributed version) produces intermodulation artefacts on complex bass signals at low frequencies.
-- **Oct up:** `PitchShift.ar` rather than `sig*sig` (frequency doubling via squaring has no audible effect on complex signals).
-- **Output LPF** (330Ω + 22nF) on the Bela audio output prevents sigma-delta converter out-of-band noise from aliasing through nonlinear downstream stages (preamp/DI).
-- **Bela mono wiring:** Bela's codec requires both stereo channels connected. Both channels are wired to each mono jack. Leaving either floating results in no signal or noise.
 
 ---
 
