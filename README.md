@@ -1,5 +1,7 @@
 # Bela Fumna
 
+![Bela Fumna](img/exterior.jpeg)
+
 **Bela Fumna** is a custom multi-effects stompbox for electric bass, built on the [Bela](https://bela.io) embedded audio platform and programmed in [SuperCollider](https://supercollider.github.io). It is designed for live bass performance.
 
 The name is a Piedmontese pun: *Bela* (the platform) + *fumna* (Piedmontese dialect for *donna*/woman — also evoking the plant *Atropa belladonna*, attractive on the surface, dangerous in its effects).
@@ -49,7 +51,9 @@ Design priorities are stability, instant recall, and a small number of well-chos
 
 ### Wiring
 
-Electronic wiring of the full pedal:
+![Internal wiring](img/interior.jpeg)
+
+Electronic wiring diagram of the full pedal:
 
 ![Wiring diagram](wiring.svg)
 
