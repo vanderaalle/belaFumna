@@ -251,12 +251,6 @@ Use `bela_fumna_laptop.scd` in the standard SC IDE. The file replaces all `Analo
 - **Bela mono wiring:** Bela's codec requires both stereo channels connected. Both L and R outputs are wired to the mono output jack. Leaving either floating results in no signal or noise.
 - **Switches:** 3PDT latching, active-low. Pole 1 drives the LED (hardware only). Pole 2 feeds a Bela DigitalIn via a 10kΩ pull-down. See `switch_wiring.svg` for the full soldering guide.
 
-### Effects
-
-- **Oct down (monolithic):** uses `ToggleFF` zero-crossing divider rather than ring modulation. The ring-mod approach (used in the distributed version) produces intermodulation artefacts on complex bass signals at low frequencies.
-- **Oct up:** `PitchShift.ar` rather than `sig*sig` — frequency doubling via squaring has no audible effect on complex signals.
-- **Autowah:** amplitude scaling is done in dB space for a more musical envelope-controlled response. `Normalizer.ar` was tested and rejected as makeup gain — it acts as a sustainer rather than a level corrector.
-
 ### SuperCollider / Bela
 
 - **Monolithic SynthDef:** all six effects run unconditionally on every block. Computing a bypassed signal and multiplying by zero is cheaper on a single-core system than dynamic graph restructuring.
