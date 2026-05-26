@@ -1,0 +1,176 @@
+digraph wiring {
+
+    // ── Graph layout ────────────────────────────────────────────────
+    rankdir=LR
+    graph [
+        fontname  = "Ubuntu Condensed"
+        fontsize  = 12
+        label     = "Bela Fumna — wiring diagram"
+        labelloc  = t
+        labeljust = l
+        splines   = polyline
+        nodesep   = 0.45
+        ranksep   = 1.4
+        bgcolor   = white
+    ]
+    node [fontname="Ubuntu Condensed" fontsize=10 shape=box style=filled]
+    edge [fontname="Ubuntu Condensed" fontsize=8  color="#444444"]
+
+    // ── Audio connectors ────────────────────────────────────────────
+    jin  [label="Input jack\nLumberg KLB3 6.35mm mono"  fillcolor=firebrick  fontcolor=white]
+    jout [label="Output jack\nLumberg KLB3 6.35mm mono" fillcolor=firebrick  fontcolor=white]
+
+    // ── Output LPF ──────────────────────────────────────────────────
+    lpf [label="Output LPF\n330 Ω + 22 nF (223)\nf_c ≈ 21.9 kHz" fillcolor=mediumpurple fontcolor=white]
+
+    // ── Power ───────────────────────────────────────────────────────
+    usb [label="USB 5V\n(panel-mount socket)" fillcolor=darkorange fontcolor=white]
+
+    // ── BELA board ──────────────────────────────────────────────────
+    subgraph cluster_bela {
+        label     = "BELA  (BeagleBone Black + cape)"
+        style     = filled
+        fillcolor = "#ddeeff"
+        color     = "#336699"
+        fontname  = "Ubuntu Condensed"
+        fontsize  = 11
+        fontcolor = "#336699"
+
+        // Analog inputs — potentiometers
+        node [fillcolor="#336699" fontcolor=white]
+        a5  [label="A5  AnalogIn 5\nK1  input gain"]
+        a6  [label="A6  AnalogIn 6\nK2  blend"]
+        a7  [label="A7  AnalogIn 7\nK3  output vol"]
+
+        // Digital inputs — footswitches
+        d0  [label="D0   DigitalIn 0\nSW1  oct up"]
+        d2  [label="D2   DigitalIn 2\nSW2  chorus"]
+        d4  [label="D4   DigitalIn 4\nSW3  oct down"]
+        d6  [label="D6   DigitalIn 6\nSW4  autowah"]
+        d7  [label="D7   DigitalIn 7\nSW5  reverb"]
+        d10 [label="D10  DigitalIn 10\nSW6  reverse"]
+
+        // Audio I/O
+        node [fillcolor=darkmagenta fontcolor=white]
+        ain   [label="Audio In L\n(ch 0)"]
+        aoutL [label="Audio Out L"]
+        aoutR [label="Audio Out R"]
+
+        // Power rails
+        node [fillcolor=darkorange fontcolor=white]
+        v33 [label="3.3 V"]
+        v5  [label="5 V (USB)"]
+        gnd [label="GND"]
+    }
+
+    // ── Potentiometers ──────────────────────────────────────────────
+    node [fillcolor="#ddcc00" fontcolor=black]
+    K1 [label="K1  input gain\n10 kΩ linear  Alpha 16mm"]
+    K2 [label="K2  blend\n10 kΩ linear  Alpha 16mm"]
+    K3 [label="K3  output vol\n10 kΩ linear  Alpha 16mm"]
+
+    // ── Footswitches ────────────────────────────────────────────────
+    // Each 3PDT latching switch uses two poles:
+    //   Pole 1 (LED):  5V → 100Ω → NO; COM → LED+ → LED− → GND
+    //                  LED on when latched. Pure hardware — no software.
+    //   Pole 2 (DI):   3.3V → NC; COM → DigitalIn + 10kΩ pull-down → GND
+    //                  Not latched: NC closed → 3.3V → pin HIGH (= 1)
+    //                  Latched:     NC open  → pull-down → pin LOW  (= 0)
+    //                  SC: sw = 1 – DigitalIn.kr(pin)  →  latched = 1 = active
+    //   Pole 3:        unused
+    node [fillcolor=darkslateblue fontcolor=white]
+    SW1 [label="SW1  oct up\n3PDT latching"]
+    SW2 [label="SW2  chorus\n3PDT latching"]
+    SW3 [label="SW3  oct down\n3PDT latching"]
+    SW4 [label="SW4  autowah\n3PDT latching"]
+    SW5 [label="SW5  reverb\n3PDT latching"]
+    SW6 [label="SW6  reverse\n3PDT latching"]
+
+    // ── Passive components ──────────────────────────────────────────
+    node [fillcolor=lightgrey fontcolor=black]
+    led_r [label="100 Ω × 6\nLED current limit\n(pole 1, from 5V)"]
+    pd_r  [label="10 kΩ × 6\npull-down\n(pole 2, DigitalIn → GND)"]
+
+    // ── Switch wiring legend ────────────────────────────────────────
+    node [shape=note fillcolor="#fffbe6" fontcolor="#555555"]
+    legend [label="Per-switch wiring (all 6 identical):\l\
+\l\
+  Pole 1 — LED (hardware, no software):\l\
+    5V → 100Ω → NO\l\
+    COM → LED+ → LED- → GND\l\
+    Latched ON → NO-COM closed → LED on\l\
+\l\
+  Pole 2 — DigitalIn (active-low):\l\
+    3.3V → NC terminal\l\
+    COM → DigitalIn pin + 10kΩ pull-down → GND\l\
+    Not latched: NC closed → 3.3V → pin HIGH (1)\l\
+    Latched:     NC open  → pull-down → pin LOW (0)\l\
+    SC: sw = 1 - DigitalIn.kr(pin)\l\
+        latched (0) → sw=1 → effect active\l\
+\l\
+  Pole 3 — unused\l"]
+
+    // ── CONNECTIONS ─────────────────────────────────────────────────
+
+    // Power
+    usb -> v33 [label=" Bela reg"]
+    usb -> v5  [label=" direct"]
+
+    // Audio input
+    jin -> ain [label=" tip → ch 0"]
+
+    // Audio output: both channels → LPF → output jack
+    // (both wired to mono jack; leaving either floating = noise)
+    aoutL -> lpf [label=" L"]
+    aoutR -> lpf [label=" R  (L+R summed\nat mono jack)"]
+    lpf   -> jout
+
+    // Potentiometers
+    // CW → 3.3V;  wiper → AnalogIn;  CCW → GND
+    // (Bela ADC max ≈ 3.3V/4.096V ≈ 0.83 → linexp(0, 0.83, ...) in code)
+    v33 -> K1 [label=" CW  (3.3V ref)"]
+    v33 -> K2 [label=" CW"]
+    v33 -> K3 [label=" CW"]
+    K1  -> a5 [label=" wiper"]
+    K2  -> a6 [label=" wiper"]
+    K3  -> a7 [label=" wiper"]
+    K1  -> gnd [label=" CCW" style=dashed color=grey]
+    K2  -> gnd [style=dashed color=grey]
+    K3  -> gnd [style=dashed color=grey]
+
+    // Footswitches — pole 1: LED (5V through NO when latched)
+    v5    -> led_r [label=" 5V"]
+    led_r -> SW1   [label=" → NO (pole 1, ×6)"]
+    // (SW1 representative; all 6 identical — see legend)
+    SW1   -> gnd   [label=" LED− via COM" style=dashed color=grey]
+
+    // Footswitches — pole 2: DigitalIn signal (active-low via NC + pull-down)
+    v33 -> SW1 [label=" 3.3V → NC\n(pole 2, ×6)" color="#336699"]
+    v33 -> SW2 [label=" 3.3V → NC" color="#336699"]
+    v33 -> SW3 [color="#336699"]
+    v33 -> SW4 [color="#336699"]
+    v33 -> SW5 [color="#336699"]
+    v33 -> SW6 [color="#336699"]
+
+    SW1 -> d0  [label=" COM → pin\n(not latched: HIGH\nlatched: LOW)"]
+    SW2 -> d2
+    SW3 -> d4
+    SW4 -> d6
+    SW5 -> d7
+    SW6 -> d10
+
+    // Pull-down resistors on DigitalIn pins
+    d0  -> pd_r [label=" → GND" style=dashed color=grey]
+    d2  -> pd_r [style=dashed color=grey]
+    d4  -> pd_r [style=dashed color=grey]
+    d6  -> pd_r [style=dashed color=grey]
+    d7  -> pd_r [style=dashed color=grey]
+    d10 -> pd_r [style=dashed color=grey]
+    pd_r -> gnd [style=dashed color=grey]
+
+    // Rank constraints
+    { rank=source; jin; usb; }
+    { rank=same;   K1; K2; K3; }
+    { rank=same;   SW1; SW2; SW3; SW4; SW5; SW6; led_r; pd_r; }
+    { rank=sink;   jout; legend; }
+}

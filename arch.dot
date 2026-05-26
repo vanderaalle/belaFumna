@@ -1,0 +1,51 @@
+digraph G {
+    // Graph attributes
+    rankdir=LR
+    node [shape=box fontname="Ubuntu Condensed" fontcolor=white]
+    edge [fontname="Helvetica"]
+
+    // Nodes
+    in [label="Input" fillcolor=darkmagenta style=filled]
+    out [label="Output" fillcolor=darkmagenta style=filled]
+    sw1 [label="Switch 1" shape=component fillcolor=darkslateblue style=filled]
+    sw2 [label="Switch 2" shape=component fillcolor=darkslateblue style=filled]
+    sw3 [label="Switch 3" shape=component fillcolor=darkslateblue style=filled]
+    sw4 [label="Switch 4" shape=component fillcolor=darkslateblue style=filled]
+    sw5 [label="Switch 5" shape=component fillcolor=darkslateblue style=filled]
+    sw6 [label="Switch 6" shape=component fillcolor=darkslateblue style=filled]
+    kn1 [label="Knob 1" shape=component fillcolor=orange style=filled]
+    kn2 [label="Knob 2" shape=component fillcolor=orange style=filled]
+    kn3 [label="Knob 3" shape=component fillcolor=orange style=filled]
+    cnt [label="Scaler" style=filled fillcolor=darkolivegreen3]
+    hin [label="In 1" shape=component fillcolor=red style=filled]
+    hout [label="Out 1" shape=component fillcolor=red style=filled]
+    lpf [label="LPF\n330Ω + 22nF" fillcolor=mediumpurple style=filled]
+    
+    mix [label="mixer" fillcolor=darkmagenta style=filled]
+    submix [label="fx mixer" fillcolor=darkmagenta style=filled]
+    fx1 [label="fx1" fillcolor=darkgreen style=filled]
+    fx2 [label="fx2" fillcolor=darkgreen style=filled]
+    fx3 [label="fx3" fillcolor=darkgreen style=filled]
+    fx4 [label="fx4" fillcolor=darkgreen style=filled]
+    fx5 [label="fx5" fillcolor=darkgreen style=filled]
+    fx6 [label="fx6" fillcolor=darkgreen style=filled]
+
+    // Edges
+    hin -> in
+    out -> lpf -> hout
+    mix -> out [label="sound out"]
+    in -> mix
+    in -> { fx1 fx2 fx3 fx4 fx5 fx6 }
+    { fx1 fx2 fx3 fx4 fx5 fx6 } -> submix -> mix
+    { sw1 sw2 sw3 sw4 sw5 sw6 } -> cnt -> submix
+    sw1 -> fx1
+    sw2 -> fx2
+    sw3 -> fx3
+    sw4 -> fx4
+    sw5 -> fx5
+    sw6 -> fx6
+    kn1 -> in
+    kn3 -> out
+    kn2 -> mix
+    kn2 -> submix
+}

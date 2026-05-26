@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="680" height="380" viewBox="0 0 680 380">
+  <title>Bela Fumna — Signal Architecture</title>
+  <desc>Parallel-fx architecture: hardware input feeds an Input node (gain via Knob 1), which fans audio to six independent fx slots and a dry path. Each fx is gated by its footswitch; the Scaler normalises the summed wet signal by active count. Knob 2 blends dry/wet in the mixer. Knob 3 sets output level.</desc>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5"
+            markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke"
+            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <style>
+      text { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; }
+    </style>
+  </defs>
+
+  <!-- White background -->
+  <rect width="680" height="380" fill="white"/>
+
+  <!-- ══════════════════════════════════════════════
+       BACKGROUND PATHS  (drawn first; nodes render on top)
+       DASHED = audio signal    SOLID = control signal
+       ══════════════════════════════════════════════ -->
+
+  <!-- in → {fx 1‥6} audio fan (dashed) -->
+  <line x1="149" y1="130" x2="169" y2="130"
+        stroke="#888" stroke-width="1" stroke-dasharray="4 3"/>
+  <circle cx="169" cy="130" r="2.5" fill="#888"/>
+  <line x1="169" y1="40"  x2="169" y2="220"
+        stroke="#888" stroke-width="1" stroke-dasharray="4 3"/>
+  <line x1="169" y1="40"  x2="283" y2="40"  stroke="#888" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#arrow)"/>
+  <line x1="169" y1="76"  x2="283" y2="76"  stroke="#888" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#arrow)"/>
+  <line x1="169" y1="112" x2="283" y2="112" stroke="#888" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#arrow)"/>
+  <line x1="169" y1="148" x2="283" y2="148" stroke="#888" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#arrow)"/>
+  <line x1="169" y1="184" x2="283" y2="184" stroke="#888" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#arrow)"/>
+  <line x1="169" y1="220" x2="283" y2="220" stroke="#888" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#arrow)"/>
+
+  <!-- in → mixer dry path (dashed, loops below) -->
+  <path d="M117 144 L117 340 L505 340 L505 144"
+        fill="none" stroke="#888" stroke-width="1" stroke-dasharray="4 3"
+        marker-end="url(#arrow)"/>
+
+  <!-- fx → fx mixer audio bus (dashed) -->
+  <line x1="350" y1="40"  x2="363" y2="40"  stroke="#888" stroke-width="1" stroke-dasharray="4 3"/>
+  <line x1="350" y1="76"  x2="363" y2="76"  stroke="#888" stroke-width="1" stroke-dasharray="4 3"/>
+  <line x1="350" y1="112" x2="363" y2="112" stroke="#888" stroke-width="1" stroke-dasharray="4 3"/>
+  <line x1="350" y1="148" x2="363" y2="148" stroke="#888" stroke-width="1" stroke-dasharray="4 3"/>
+  <line x1="350" y1="184" x2="363" y2="184" stroke="#888" stroke-width="1" stroke-dasharray="4 3"/>
+  <line x1="350" y1="220" x2="363" y2="220" stroke="#888" stroke-width="1" stroke-dasharray="4 3"/>
+  <line x1="363" y1="40"  x2="363" y2="220" stroke="#888" stroke-width="1" stroke-dasharray="4 3"/>
+  <line x1="363" y1="130" x2="375" y2="130" stroke="#888" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#arrow)"/>
+
+  <!-- sw → Scaler left-side control bus (solid) -->
+  <line x1="183" y1="40"  x2="193" y2="40"  stroke="#666" stroke-width="0.8"/>
+  <line x1="183" y1="76"  x2="193" y2="76"  stroke="#666" stroke-width="0.8"/>
+  <line x1="183" y1="112" x2="193" y2="112" stroke="#666" stroke-width="0.8"/>
+  <line x1="183" y1="148" x2="193" y2="148" stroke="#666" stroke-width="0.8"/>
+  <line x1="183" y1="184" x2="193" y2="184" stroke="#666" stroke-width="0.8"/>
+  <line x1="183" y1="220" x2="193" y2="220" stroke="#666" stroke-width="0.8"/>
+  <line x1="183" y1="40"  x2="183" y2="288" stroke="#666" stroke-width="0.8"/>
+  <line x1="183" y1="288" x2="193" y2="288" stroke="#666" stroke-width="0.8" marker-end="url(#arrow)"/>
+
+  <!-- Scaler → fx mixer (solid, control) -->
+  <path d="M268 288 L416 288 L416 154"
+        fill="none" stroke="#555" stroke-width="0.8" marker-end="url(#arrow)"/>
+
+  <!-- Knob 2 → fx mixer (solid, control, enters submix from bottom) -->
+  <path d="M473 224 L430 224 L430 154"
+        fill="none" stroke="#555" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+  <!-- ══════════════════════════════════════════════
+       NODES
+       ══════════════════════════════════════════════ -->
+
+  <!-- Hardware In -->
+  <rect x="15" y="116" width="46" height="28" rx="4"
+        fill="#F5C4B3" stroke="#993C1D" stroke-width="0.8"/>
+  <text x="38" y="130" text-anchor="middle" dominant-baseline="central"
+        font-size="12" font-weight="600" fill="#4A1B0C">In</text>
+
+  <!-- Input -->
+  <rect x="80" y="116" width="65" height="28" rx="4"
+        fill="#CECBF6" stroke="#534AB7" stroke-width="0.8"/>
+  <text x="112" y="130" text-anchor="middle" dominant-baseline="central"
+        font-size="12" font-weight="600" fill="#26215C">Input</text>
+
+  <!-- Knob 1 -->
+  <rect x="80" y="57" width="70" height="24" rx="4"
+        fill="#FAC775" stroke="#BA7517" stroke-width="0.8"/>
+  <text x="115" y="69" text-anchor="middle" dominant-baseline="central"
+        font-size="12" font-weight="600" fill="#412402">Knob 1</text>
+
+  <!-- Switches 1–6 -->
+  <rect x="193" y="28"  width="75" height="24" rx="4" fill="#B5D4F4" stroke="#185FA5" stroke-width="0.8"/>
+  <text x="230" y="40"  text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="600" fill="#042C53">Switch 1</text>
+  <rect x="193" y="64"  width="75" height="24" rx="4" fill="#B5D4F4" stroke="#185FA5" stroke-width="0.8"/>
+  <text x="230" y="76"  text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="600" fill="#042C53">Switch 2</text>
+  <rect x="193" y="100" width="75" height="24" rx="4" fill="#B5D4F4" stroke="#185FA5" stroke-width="0.8"/>
+  <text x="230" y="112" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="600" fill="#042C53">Switch 3</text>
+  <rect x="193" y="136" width="75" height="24" rx="4" fill="#B5D4F4" stroke="#185FA5" stroke-width="0.8"/>
+  <text x="230" y="148" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="600" fill="#042C53">Switch 4</text>
+  <rect x="193" y="172" width="75" height="24" rx="4" fill="#B5D4F4" stroke="#185FA5" stroke-width="0.8"/>
+  <text x="230" y="184" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="600" fill="#042C53">Switch 5</text>
+  <rect x="193" y="208" width="75" height="24" rx="4" fill="#B5D4F4" stroke="#185FA5" stroke-width="0.8"/>
+  <text x="230" y="220" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="600" fill="#042C53">Switch 6</text>
+
+  <!-- FX 1–6 -->
+  <rect x="285" y="28"  width="65" height="24" rx="4" fill="#9FE1CB" stroke="#0F6E56" stroke-width="0.8"/>
+  <text x="317" y="40"  text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="600" fill="#04342C">fx 1</text>
+  <rect x="285" y="64"  width="65" height="24" rx="4" fill="#9FE1CB" stroke="#0F6E56" stroke-width="0.8"/>
+  <text x="317" y="76"  text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="600" fill="#04342C">fx 2</text>
+  <rect x="285" y="100" width="65" height="24" rx="4" fill="#9FE1CB" stroke="#0F6E56" stroke-width="0.8"/>
+  <text x="317" y="112" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="600" fill="#04342C">fx 3</text>
+  <rect x="285" y="136" width="65" height="24" rx="4" fill="#9FE1CB" stroke="#0F6E56" stroke-width="0.8"/>
+  <text x="317" y="148" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="600" fill="#04342C">fx 4</text>
+  <rect x="285" y="172" width="65" height="24" rx="4" fill="#9FE1CB" stroke="#0F6E56" stroke-width="0.8"/>
+  <text x="317" y="184" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="600" fill="#04342C">fx 5</text>
+  <rect x="285" y="208" width="65" height="24" rx="4" fill="#9FE1CB" stroke="#0F6E56" stroke-width="0.8"/>
+  <text x="317" y="220" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="600" fill="#04342C">fx 6</text>
+
+  <!-- Scaler -->
+  <rect x="193" y="276" width="75" height="24" rx="4"
+        fill="#C0DD97" stroke="#3B6D11" stroke-width="0.8"/>
+  <text x="230" y="288" text-anchor="middle" dominant-baseline="central"
+        font-size="12" font-weight="600" fill="#173404">Scaler</text>
+
+  <!-- fx mixer -->
+  <rect x="375" y="106" width="82" height="48" rx="4"
+        fill="#CECBF6" stroke="#534AB7" stroke-width="0.8"/>
+  <text x="416" y="130" text-anchor="middle" dominant-baseline="central"
+        font-size="12" font-weight="600" fill="#26215C">fx mixer</text>
+
+  <!-- mixer -->
+  <rect x="473" y="116" width="65" height="28" rx="4"
+        fill="#CECBF6" stroke="#534AB7" stroke-width="0.8"/>
+  <text x="505" y="130" text-anchor="middle" dominant-baseline="central"
+        font-size="12" font-weight="600" fill="#26215C">mixer</text>
+
+  <!-- Knob 2 -->
+  <rect x="473" y="212" width="65" height="24" rx="4"
+        fill="#FAC775" stroke="#BA7517" stroke-width="0.8"/>
+  <text x="505" y="224" text-anchor="middle" dominant-baseline="central"
+        font-size="12" font-weight="600" fill="#412402">Knob 2</text>
+
+  <!-- Output -->
+  <rect x="556" y="116" width="68" height="28" rx="4"
+        fill="#CECBF6" stroke="#534AB7" stroke-width="0.8"/>
+  <text x="590" y="130" text-anchor="middle" dominant-baseline="central"
+        font-size="12" font-weight="600" fill="#26215C">Output</text>
+
+  <!-- Knob 3 -->
+  <rect x="558" y="57" width="60" height="24" rx="4"
+        fill="#FAC775" stroke="#BA7517" stroke-width="0.8"/>
+  <text x="588" y="69" text-anchor="middle" dominant-baseline="central"
+        font-size="12" font-weight="600" fill="#412402">Knob 3</text>
+
+  <!-- Hardware Out -->
+  <rect x="638" y="116" width="36" height="28" rx="4"
+        fill="#F5C4B3" stroke="#993C1D" stroke-width="0.8"/>
+  <text x="656" y="130" text-anchor="middle" dominant-baseline="central"
+        font-size="12" font-weight="600" fill="#4A1B0C">Out</text>
+
+  <!-- ══════════════════════════════════════════════
+       FOREGROUND ARROWS
+       DASHED = audio    SOLID = control
+       ══════════════════════════════════════════════ -->
+
+  <!-- Hardware In → Input (audio, dashed) -->
+  <line x1="61" y1="130" x2="80" y2="130"
+        stroke="#888" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#arrow)"/>
+
+  <!-- Knob 1 → Input (control, solid) -->
+  <line x1="115" y1="81" x2="115" y2="116"
+        stroke="#555" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Switch n → fx n  (control, solid, ×6) -->
+  <line x1="268" y1="40"  x2="283" y2="40"  stroke="#555" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="268" y1="76"  x2="283" y2="76"  stroke="#555" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="268" y1="112" x2="283" y2="112" stroke="#555" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="268" y1="148" x2="283" y2="148" stroke="#555" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="268" y1="184" x2="283" y2="184" stroke="#555" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="268" y1="220" x2="283" y2="220" stroke="#555" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- fx mixer → mixer (audio, dashed) -->
+  <line x1="457" y1="130" x2="473" y2="130"
+        stroke="#888" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#arrow)"/>
+
+  <!-- mixer → Output (audio, dashed) -->
+  <line x1="538" y1="130" x2="556" y2="130"
+        stroke="#888" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#arrow)"/>
+
+  <!-- Output → Hardware Out (audio, dashed) -->
+  <line x1="624" y1="130" x2="638" y2="130"
+        stroke="#888" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#arrow)"/>
+
+  <!-- Knob 2 → mixer (control, solid) -->
+  <line x1="505" y1="212" x2="505" y2="144"
+        stroke="#555" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Knob 3 → Output (control, solid) -->
+  <line x1="588" y1="81" x2="588" y2="116"
+        stroke="#555" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- ══════════════════════════════════════════════
+       LEGEND
+       ══════════════════════════════════════════════ -->
+  <line x1="20"  y1="358" x2="52"  y2="358"
+        stroke="#888" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#arrow)"/>
+  <text x="58"  y="358" dominant-baseline="central" font-size="10" fill="#444">audio signal</text>
+  <line x1="150" y1="358" x2="182" y2="358"
+        stroke="#555" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="188" y="358" dominant-baseline="central" font-size="10" fill="#444">control signal</text>
+
+</svg>

@@ -1,0 +1,141 @@
+digraph sw3pdt {
+
+    // ── Graph layout ─────────────────────────────────────────────────
+    rankdir=LR
+    graph [
+        fontname  = "Ubuntu Condensed"
+        fontsize  = 12
+        label     = "Bela Fumna — 3PDT footswitch soldering guide  (all 6 switches identical)"
+        labelloc  = t
+        labeljust = l
+        splines   = polyline
+        nodesep   = 0.6
+        ranksep   = 1.3
+        bgcolor   = white
+    ]
+    node [fontname="Ubuntu Condensed" fontsize=10 shape=box style=filled]
+    edge [fontname="Ubuntu Condensed" fontsize=9  color="#444444"]
+
+    // ── Power / GND ──────────────────────────────────────────────────
+    v5  [label="5V (USB)"  fillcolor=darkorange fontcolor=white]
+    v33 [label="3.3V"      fillcolor=darkorange fontcolor=white]
+    gnd [label="GND"       fillcolor=black      fontcolor=white]
+
+    // ── Discrete components ──────────────────────────────────────────
+    r100 [label="100 Ω\nLED current limit" fillcolor=lightgrey fontcolor=black]
+    r10k [label="10 kΩ\npull-down"         fillcolor=lightgrey fontcolor=black]
+
+    // ── Bela ─────────────────────────────────────────────────────────
+    din [label="Bela DigitalIn pin\ne.g. D0 (SW1)  D2 (SW2)  D4 (SW3)\n    D6 (SW4)  D7 (SW5)  D10 (SW6)"
+         fillcolor="#336699" fontcolor=white]
+
+    // ── 3PDT illuminated latching footswitch ─────────────────────────
+    subgraph cluster_sw {
+        label     = "3PDT illuminated latching footswitch"
+        style     = filled
+        fillcolor = "#f4f4ff"
+        color     = darkslateblue
+        fontname  = "Ubuntu Condensed"
+        fontsize  = 11
+        fontcolor = darkslateblue
+
+        // LED terminals — part of the switch body (two extra pins)
+        subgraph cluster_led {
+            label     = "LED (integrated in switch body)"
+            style     = filled
+            fillcolor = "#fff8cc"
+            color     = "#aaaa00"
+            fontname  = "Ubuntu Condensed"
+            fontsize  = 9
+
+            led_p [label="LED +"  fillcolor="#eecc00" fontcolor=black]
+            led_m [label="LED −"  fillcolor="#eecc00" fontcolor=black]
+        }
+
+        // ── Pole 1 — controls the LED ────────────────────────────────
+        subgraph cluster_p1 {
+            label     = "Pole 1 — LED circuit  (hardware only, no software)"
+            style     = filled
+            fillcolor = "#dde0ff"
+            color     = "#556699"
+            fontname  = "Ubuntu Condensed"
+            fontsize  = 9
+
+            p1_no  [label="NO"                   fillcolor=darkslateblue fontcolor=white]
+            p1_com [label="COM"                   fillcolor=darkslateblue fontcolor=white]
+            p1_nc  [label="NC  ← leave free"     fillcolor="#cccccc"     fontcolor="#555555"]
+        }
+
+        // ── Pole 2 — DigitalIn signal ────────────────────────────────
+        subgraph cluster_p2 {
+            label     = "Pole 2 — DigitalIn  (active-low)"
+            style     = filled
+            fillcolor = "#dde0ff"
+            color     = "#556699"
+            fontname  = "Ubuntu Condensed"
+            fontsize  = 9
+
+            p2_nc  [label="NC"                   fillcolor=darkslateblue fontcolor=white]
+            p2_com [label="COM"                   fillcolor=darkslateblue fontcolor=white]
+            p2_no  [label="NO  ← leave free"     fillcolor="#cccccc"     fontcolor="#555555"]
+        }
+
+        // ── Pole 3 — unused ───────────────────────────────────────────
+        p3 [label="Pole 3 — leave all 3 terminals free"
+            fillcolor="#dddddd" fontcolor="#888888" style="filled,dashed"]
+
+        // Internal mechanical contacts (no soldering — shown for reference)
+        p1_no  -> p1_com [label=" internal contact\ncloses when LATCHED → LED on"
+                           style=dashed color=darkgreen dir=none constraint=false]
+        p2_nc  -> p2_com [label=" internal contact\ncloses when NOT latched"
+                           style=dotted color=gray    dir=none constraint=false]
+
+        // Internal wire from Pole 1 COM to LED+
+        // (wire this yourself — it is inside the switch housing)
+        p1_com -> led_p  [label=" ③ COM → LED+"
+                           color="#555500" fontcolor="#555500"]
+    }
+
+    // ── Solder connections — numbered steps ───────────────────────────
+
+    // Step ①②: LED current-limit resistor + Pole 1 NO
+    v5   -> r100  [label=" ① 5V → 100Ω"]
+    r100 -> p1_no [label=" ② 100Ω → NO"]
+
+    // Step ④: LED− to GND
+    led_m -> gnd  [label=" ④ LED− → GND"]
+
+    // Step ⑤: 3.3V to Pole 2 NC
+    v33    -> p2_nc  [label=" ⑤ 3.3V → NC"  color="#336699" fontcolor="#336699"]
+
+    // Step ⑥: Pole 2 COM to Bela DigitalIn
+    p2_com -> din    [label=" ⑥ COM → Bela pin"]
+
+    // Step ⑦: pull-down resistor from Pole 2 COM to GND
+    p2_com -> r10k   [label=" ⑦ COM → 10kΩ"  style=dashed color=grey fontcolor="#555555"]
+    r10k   -> gnd    [style=dashed color=grey]
+
+    // ── Steps legend ─────────────────────────────────────────────────
+    node [shape=note fillcolor="#fffbe6" fontcolor="#444444"]
+    legend [label="\
+Solder connections (repeat for each of the 6 switches):\l\
+\l\
+  ①  5V rail  →  100Ω resistor (one leg)\l\
+  ②  100Ω resistor (other leg)  →  Pole 1  NO\l\
+  ③  Pole 1  COM  →  LED+ terminal on switch body\l\
+  ④  LED− terminal  →  GND\l\
+  ⑤  3.3V rail  →  Pole 2  NC\l\
+  ⑥  Pole 2  COM  →  Bela DigitalIn pin\l\
+  ⑦  Pole 2  COM  →  10kΩ resistor  →  GND\l\
+\l\
+Leave free:  Pole 1 NC,  Pole 2 NO,  all of Pole 3\l\
+\l\
+How it works:\l\
+  Not latched:  NC-COM closed  →  3.3V on pin  →  sw = 1-1 = 0  →  effect OFF\l\
+  Latched:      NC-COM opens   →  pull-down    →  0V on pin  →  sw = 1-0 = 1  →  effect ON\l\
+                NO-COM closes  →  current through LED  →  LED ON\l"]
+
+    // ── Rank constraints ─────────────────────────────────────────────
+    { rank=source; v5; v33; }
+    { rank=sink;   gnd; legend; }
+}
